@@ -36,6 +36,10 @@ Iterator<Point> points = pc.iterator();
       .fa-map-marker{margin-top:35px;}
       .dropdownitem{padding:8px;margin:5px;border-bottom:2px solid black;}
       .infobox{height:50px;width:600px;z-index:2;margin-left:1600px;border-radius:50px;font-size:30px;text-align:center;margin-top:90px;background-color:white;display:block;position:absolute;}
+      .zoombox{height:80px;width:80px;position:absolute;z-index:2;background-color:white;margin-top:500px;margin-left:30px;border-radius:50%;color:black;text-align:center;}
+      .zoomoutbox{height:80px;width:80px;position:absolute;z-index:2;background-color:white;margin-top:500px;margin-left:150px;border-radius:50%;color:black;text-align:center;}
+      .fa-plus{margin-top:18px;}
+      .fa-minus{margin-top:18px;}
     </style>
   </head>
 
@@ -53,6 +57,12 @@ Iterator<Point> points = pc.iterator();
             </div>
         </div>
     <div class="infobox">当前区域总人数：<span id="total"></span></div>
+    <div class="zoombox" id="zoomIner">
+        <i class="fa fa-plus fa-3x" aria-hidden="true"></i>
+    </div>
+    <div class="zoomoutbox" id="zoomOuter">
+        <i class="fa fa-minus fa-3x" aria-hidden="true"></i>
+    </div>
     <div id="container" style="position:relative;"></div>
   </body>
 
@@ -79,6 +89,17 @@ Iterator<Point> points = pc.iterator();
     document.getElementById("clickChange4").onclick = function(){
       var point = new BMap.Point(121.424581,31.225596);
         changeMapPos(point,17,280,3000);
+        countCurrent(map);
+    }
+    
+    //放大缩小调整
+    document.getElementById("zoomIner").onclick = function(){
+    	map.zoomIn();
+        countCurrent(map);
+    }
+    
+    document.getElementById("zoomOuter").onclick = function(){
+        map.zoomOut();
         countCurrent(map);
     }
 
@@ -148,4 +169,8 @@ Iterator<Point> points = pc.iterator();
     	}
     	document.getElementById("total").innerHTML = total;
     }
+    
+    map.addEventListener("dragend",function(evt){
+    	countCurrent(map);
+    })
 </script>
