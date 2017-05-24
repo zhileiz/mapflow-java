@@ -5,9 +5,9 @@
 
 <html>
 
-<% 
+<%
 processCSV pc = new processCSV();
-List<String> result = pc.reprocess("/home/zhileiz/heatmap.csv"); 
+List<String> result = pc.reprocess("/home/zhileiz/heatmap.csv");
 Iterator<Point> points = pc.iterator();
 %>
 
@@ -31,15 +31,15 @@ Iterator<Point> points = pc.iterator();
       #container{height:100%;width:100%;}
       #r-result{width:100%;}
       #menu{border-radius:20px;margin:5%;}
-      .choosePos{height:150px;width:150px;z-index:2;background-color:white;margin:40px;border-radius:50%;color:black;text-align:center;position:absolute;}
-      .chooseDrop{height:400px;width:140px;text-align:center;border-radius:60px;z-index:1;background-color:yellow;margin:45px;margin-top:60px;position:absolute;display:block;color:black;font-size:20px;}
-      .fa-map-marker{margin-top:35px;}
+      .choosePos{height:15%;width:8%;z-index:2;background-color:white;margin:3% 5%;border-radius:50%;color:black;text-align:center;position:absolute;}
+      .chooseDrop{height:45%;width:6%;text-align:center;border-radius:50px;z-index:1;background-color:yellow;margin:6%;margin-top:5%;position:absolute;display:block;color:black;font-size:16px;}
+      .fa-map-marker{margin-top:12%;}
       .dropdownitem{padding:8px;margin:5px;border-bottom:2px solid black;}
-      .infobox{height:50px;width:600px;z-index:2;margin-left:1600px;border-radius:50px;font-size:30px;text-align:center;margin-top:90px;background-color:white;display:block;position:absolute;}
-      .zoombox{height:80px;width:80px;position:absolute;z-index:2;background-color:white;margin-top:500px;margin-left:30px;border-radius:50%;color:black;text-align:center;}
-      .zoomoutbox{height:80px;width:80px;position:absolute;z-index:2;background-color:white;margin-top:500px;margin-left:150px;border-radius:50%;color:black;text-align:center;}
-      .fa-plus{margin-top:18px;}
-      .fa-minus{margin-top:18px;}
+      .infobox{height:30px;width:20%;z-index:2;margin-left:70%;border-radius:50px;font-size:22px;text-align:center;margin-top:5%;background-color:white;display:block;position:absolute;}
+      .zoombox{height:60px;width:60px;position:absolute;z-index:2;background-color:white;margin-top:30%;margin-left:5%;border-radius:50%;color:black;text-align:center;}
+      .zoomoutbox{height:60px;width:60px;position:absolute;z-index:2;background-color:white;margin-top:30%;margin-left:10%;border-radius:50%;color:black;text-align:center;}
+      .fa-plus{margin-top:6px;}
+      .fa-minus{margin-top:6px;}
     </style>
   </head>
 
@@ -48,7 +48,8 @@ Iterator<Point> points = pc.iterator();
             <i class="fa fa-map-marker fa-5x"></i>
         </div>
         <div class="chooseDrop">
-            <div style="margin-top:130px;">
+            <div style="margin-top:120px;">
+              <div id="clickChange" class="dropdownitem">全市</div>
               <div id="clickChange1" class="dropdownitem">迪士尼</div>
               <div id="clickChange2" class="dropdownitem">人民广场</div>
               <div id="clickChange3" class="dropdownitem">浦东机场</div>
@@ -91,13 +92,18 @@ Iterator<Point> points = pc.iterator();
         changeMapPos(point,17,280,3000);
         countCurrent(map);
     }
-    
+    document.getElementById("clickChange").onclick = function(){
+        var point = new BMap.Point(121.7, 31.16);
+          changeMapPos(point,11,12,2000);
+          countCurrent(map);
+    }
+
     //放大缩小调整
     document.getElementById("zoomIner").onclick = function(){
-    	map.zoomIn();
+        map.zoomIn();
         countCurrent(map);
     }
-    
+
     document.getElementById("zoomOuter").onclick = function(){
         map.zoomOut();
         countCurrent(map);
@@ -107,15 +113,15 @@ Iterator<Point> points = pc.iterator();
     function changeMapPos(point,zoom,radius,scale){
         map.removeOverlay(heatmapOverlay);
         map.centerAndZoom(point, zoom);
-        heatmapOverlayk = new BMapLib.HeatmapOverlay({"radius":radius});
-        map.addOverlay(heatmapOverlayk);
+        heatmapOverlay = new BMapLib.HeatmapOverlay({"radius":radius});
+        map.addOverlay(heatmapOverlay);
         map.enableDragging();
-        heatmapOverlayk.setDataSet({data:points,max:scale});
+        heatmapOverlay.setDataSet({data:points,max:scale});
     }
 
     //初始化地图
     var map = new BMap.Map("container");
-    var point = new BMap.Point(121.9, 31.16);
+    var point = new BMap.Point(121.7, 31.16);
     map.centerAndZoom(point, 11);
     map.disableScrollWheelZoom();
     map.setMapStyle({style:'midnight'});
@@ -128,7 +134,7 @@ Iterator<Point> points = pc.iterator();
       }
       %>
     ];
-    
+
 
     //查看是否支持热力图
     if(!isSupportCanvas()){
@@ -155,22 +161,22 @@ Iterator<Point> points = pc.iterator();
         var elem = document.createElement('canvas');
         return !!(elem.getContext && elem.getContext('2d'));
     }
-    
+
     function countCurrent(map){
-    	var total = 0;
-    	var boundary = map.getBounds();
-    	for (var point in points){
-    		var longit = parseFloat(points[point].lng);
-    		var latit = parseFloat(points[point].lat);
-    		var temp = new BMap.Point(longit,latit);
-    		if (boundary.containsPoint(temp)){
-    		total = total + parseInt(points[point].count);
-    		}
-    	}
-    	document.getElementById("total").innerHTML = total;
+        var total = 0;
+        var boundary = map.getBounds();
+        for (var point in points){
+            var longit = parseFloat(points[point].lng);
+            var latit = parseFloat(points[point].lat);
+            var temp = new BMap.Point(longit,latit);
+            if (boundary.containsPoint(temp)){
+            total = total + parseInt(points[point].count);
+            }
+        }
+        document.getElementById("total").innerHTML = total;
     }
-    
+
     map.addEventListener("dragend",function(evt){
-    	countCurrent(map);
+        countCurrent(map);
     })
 </script>
