@@ -46,60 +46,42 @@
 </html>
 
 <script type="text/javascript">
+
+    // 地图选区操作
     document.getElementById("clickChange1").onclick = function(){
-    	changeMapPos1();
+      var point = new BMap.Point(121.673121,31.14944);
+        changeMapPos(point,17,150,800);
     }
     document.getElementById("clickChange2").onclick = function(){
-        changeMapPos2();
+      var point = new BMap.Point(121.483329,31.235889);
+        changeMapPos(point,17,150,5000);
     }
     document.getElementById("clickChange3").onclick = function(){
-        changeMapPos3();
+      var point = new BMap.Point(121.817487,31.15766);
+        changeMapPos(point,16,150,3000);
     }
     document.getElementById("clickChange4").onclick = function(){
-        changeMapPos4();
-    }
-    function changeMapPos1(){
-        map.removeOverlay(heatmapOverlay);
-        var point = new BMap.Point(121.673121,31.14944);
-        map.centerAndZoom(point, 16);
-        heatmapOverlayk = new BMapLib.HeatmapOverlay({"radius":100});
-        map.addOverlay(heatmapOverlayk);
-        map.enableDragging();
-        heatmapOverlayk.setDataSet({data:points,max:800});
-    }
-    function changeMapPos2(){
-        map.removeOverlay(heatmapOverlay);
-        var point = new BMap.Point(121.483329,31.235889);
-        map.centerAndZoom(point, 17);
-        heatmapOverlayk = new BMapLib.HeatmapOverlay({"radius":100});
-        map.addOverlay(heatmapOverlayk);
-        map.enableDragging();
-        heatmapOverlayk.setDataSet({data:points,max:8000});
-    }
-    function changeMapPos3(){
-        map.removeOverlay(heatmapOverlay);
-        var point = new BMap.Point(121.817487,31.15766);
-        map.centerAndZoom(point, 16);
-        heatmapOverlayk = new BMapLib.HeatmapOverlay({"radius":100});
-        map.addOverlay(heatmapOverlayk);
-        map.enableDragging();
-        heatmapOverlayk.setDataSet({data:points,max:3000});
-    }
-    function changeMapPos4(){
-        map.removeOverlay(heatmapOverlay);
-        var point = new BMap.Point(121.424581,31.225596);
-        map.centerAndZoom(point, 16);
-        heatmapOverlayk = new BMapLib.HeatmapOverlay({"radius":100});
-        map.addOverlay(heatmapOverlayk);
-        map.enableDragging();
-        heatmapOverlayk.setDataSet({data:points,max:8000});
+      var point = new BMap.Point(121.424581,31.225596);
+        changeMapPos(point,17,150,5000);
     }
 
-    var map = new BMap.Map("container");          // 创建地图实例
+    // 地图选区重绘函数
+    function changeMapPos(point,zoom,radius,scale){
+        map.removeOverlay(heatmapOverlay);
+        map.centerAndZoom(point, zoom);
+        heatmapOverlayk = new BMapLib.HeatmapOverlay({"radius":radius});
+        map.addOverlay(heatmapOverlayk);
+        map.enableDragging();
+        heatmapOverlayk.setDataSet({data:points,max:scale});
+    }
+
+    //初始化地图
+    var map = new BMap.Map("container");
     var point = new BMap.Point(121.9, 31.16);
-    map.centerAndZoom(point, 11);             // 初始化地图，设置中心点坐标和地图级别
+    map.centerAndZoom(point, 11);
     map.disableScrollWheelZoom();
 
+    //地图点JAVA脚本
     var points =[
       <%
       String[] output = null;
@@ -109,33 +91,18 @@
         if(Integer.parseInt(output[3])>max){
             max = Integer.parseInt(output[3]);
         }
-        System.out.println("unchanged longitude: " + output[1]);
-        System.out.println("unchanged latitude: " + output[2]);
         Double[] coordinates = transform.transform(Double.parseDouble(output[2]), Double.parseDouble(output[1]));
-        System.out.println("baidu longitude: " + coordinates[0]);
-        System.out.println("baidu latitude: " + coordinates[1]);
         out.println("{\"lng\":\""+coordinates[0]+"\",\"lat\":\""+coordinates[1]+"\",\"count\":\""+output[3]+"\"},");
       }
       %>
     ];
 
+    //查看是否支持热力图
     if(!isSupportCanvas()){
         alert('热力图目前只支持有canvas支持的浏览器,您所使用的浏览器不能使用热力图功能~')
     }
-    //详细的参数,可以查看heatmap.js的文档 https://github.com/pa7/heatmap.js/blob/master/README.md
-    //参数说明如下:
-    /* visible 热力图是否显示,默认为true
-     * opacity 热力的透明度,1-100
-     * radius 势力图的每个点的半径大小
-     * gradient  {JSON} 热力图的渐变区间 . gradient如下所示
-     *  {
-            .2:'rgb(0, 255, 255)',
-            .5:'rgb(0, 110, 255)',
-            .8:'rgb(100, 0, 255)'
-        }
-        其中 key 表示插值的位置, 0~1.
-            value 为颜色值.
-     */
+
+    //初始化热力图
     heatmapOverlay = new BMapLib.HeatmapOverlay({"radius":12});
     map.addOverlay(heatmapOverlay);
     heatmapOverlay.setDataSet({data:points,max:3000});
@@ -148,39 +115,6 @@
         });
         heatmapOverlay.setOptions({"gradient":gradient});
     }
-
-    var sel = document.getElementById('stylelist');
-    for(var key in mapstyles){
-        var style = mapstyles[key];
-        var item = new  Option(style.title,key);
-        sel.options.add(item);
-    }
-  changeMapStyle('midnight')
-  sel.value = 'midnight';
-
-  function changeMapStyle(style){
-      map.setMapStyle({style:style});
-      if(style=='grayscale'){
-        map.removeOverlay(heatmapOverlay);
-        var point = new BMap.Point(121.673121,31.14944);
-        map.centerAndZoom(point, 16);
-        heatmapOverlayk = new BMapLib.HeatmapOverlay({"radius":100,'gradient': {'0.001':'#08FFFC','0.01':'#96FF6B','0.1':'#FFFC00','0.3':'#FD9A00','0.5':'#FC5B00','0.95':'#F80000'}});
-        map.addOverlay(heatmapOverlayk);
-        map.enableDragging();
-        heatmapOverlayk.setDataSet({data:points,max:800});
-      }
-      $('#desc').html(mapstyles[style].desc);
-  }
-  
-  function changeMapPos(){
-	  map.removeOverlay(heatmapOverlay);
-      var point = new BMap.Point(121.673121,31.14944);
-      map.centerAndZoom(point, 16);
-      heatmapOverlayk = new BMapLib.HeatmapOverlay({"radius":100});
-      map.addOverlay(heatmapOverlayk);
-      map.enableDragging();
-      heatmapOverlayk.setDataSet({data:points,max:800});
-  }
 
     //判断浏览区是否支持canvas
     function isSupportCanvas(){
