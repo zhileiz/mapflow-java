@@ -5,7 +5,7 @@
 
 <html>
 
-<% List<String> result = new processCSV().generate("/home/zhileiz/heatmap.csv"); %>
+<% List<String> result = new processCSV().reprocess("/home/zhileiz/heatmap.csv"); %>
 
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -84,15 +84,8 @@
     //地图点JAVA脚本
     var points =[
       <%
-      String[] output = null;
-      int max =0;
       for(String s : result){
-        output = s.split(",");
-        if(Integer.parseInt(output[3])>max){
-            max = Integer.parseInt(output[3]);
-        }
-        Double[] coordinates = transform.transform(Double.parseDouble(output[2]), Double.parseDouble(output[1]));
-        out.println("{\"lng\":\""+coordinates[0]+"\",\"lat\":\""+coordinates[1]+"\",\"count\":\""+output[3]+"\"},");
+        out.println(s);
       }
       %>
     ];
