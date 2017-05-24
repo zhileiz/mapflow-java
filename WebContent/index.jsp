@@ -22,6 +22,7 @@ Iterator<Point> points = pc.iterator();
     <script type="text/javascript" src="http://api.map.baidu.com/library/Heatmap/2.0/src/Heatmap_min.js"></script>
     <script type="text/javascript" src="http://developer.baidu.com/map/custom/stylelist.js"></script>
     <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+    <script src="https://use.fontawesome.com/d94b0d3b0f.js"></script>
     <title>热力图功能示例</title>
     <style type="text/css">
       ul,li{list-style: none;margin:0;padding:0;float:left;}
@@ -30,22 +31,29 @@ Iterator<Point> points = pc.iterator();
       #container{height:100%;width:100%;}
       #r-result{width:100%;}
       #menu{border-radius:20px;margin:5%;}
+      .choosePos{height:150px;width:150px;z-index:2;background-color:white;margin:40px;border-radius:50%;color:black;text-align:center;position:absolute;}
+      .chooseDrop{height:400px;width:140px;text-align:center;border-radius:60px;z-index:1;background-color:yellow;margin:45px;margin-top:60px;position:absolute;display:block;color:black;font-size:20px;}
+      .fa-map-marker{margin-top:35px;}
+      .dropdownitem{padding:8px;margin:5px;border-bottom:2px solid black;}
+      .infobox{height:50px;width:600px;z-index:2;margin-left:1600px;border-radius:50px;font-size:30px;text-align:center;margin-top:90px;background-color:white;display:block;position:absolute;}
     </style>
   </head>
 
   <body>
-    <div style="position:absolute;color:black;z-index:90;">
-      <div class="row justify-content-end" style="border:10%;">
-         <div class="col-12" id="menu" style="font-size:30px;">
-              <div id="clickChange1">迪士尼</div>
-              <div id="clickChange2">人民广场</div>
-              <div id="clickChange3">浦东机场</div>
-              <div id="clickChange4">中山公园</div>
-              <div>当前区域总人数：<span id="total"></span></div>
-         </div>
-      </div>
-    </div>
-    <div id="container" style="position:relative;z-index:20;"></div>
+        <div class="choosePos">
+            <i class="fa fa-map-marker fa-5x"></i>
+        </div>
+        <div class="chooseDrop">
+            <div style="margin-top:130px;">
+              <div id="clickChange1" class="dropdownitem">迪士尼</div>
+              <div id="clickChange2" class="dropdownitem">人民广场</div>
+              <div id="clickChange3" class="dropdownitem">浦东机场</div>
+              <div id="clickChange4" class="dropdownitem">中山公园</div>
+              <div><i class="fa fa-angle-double-up fa-3x" aria-hidden="true"></i></div>
+            </div>
+        </div>
+    <div class="infobox">当前区域总人数：<span id="total"></span></div>
+    <div id="container" style="position:relative;"></div>
   </body>
 
 </html>
@@ -55,22 +63,22 @@ Iterator<Point> points = pc.iterator();
     // 地图选区操作
     document.getElementById("clickChange1").onclick = function(){
       var point = new BMap.Point(121.673121,31.14944);
-        changeMapPos(point,17,150,500);
+        changeMapPos(point,17,280,500);
         countCurrent(map);
     }
     document.getElementById("clickChange2").onclick = function(){
       var point = new BMap.Point(121.483329,31.235889);
-        changeMapPos(point,17,150,5000);
+        changeMapPos(point,17,280,5000);
         countCurrent(map);
     }
     document.getElementById("clickChange3").onclick = function(){
       var point = new BMap.Point(121.817487,31.15766);
-        changeMapPos(point,16,150,1000);
+        changeMapPos(point,16,150,1500);
         countCurrent(map);
     }
     document.getElementById("clickChange4").onclick = function(){
       var point = new BMap.Point(121.424581,31.225596);
-        changeMapPos(point,17,150,3000);
+        changeMapPos(point,17,280,3000);
         countCurrent(map);
     }
 
@@ -89,6 +97,7 @@ Iterator<Point> points = pc.iterator();
     var point = new BMap.Point(121.9, 31.16);
     map.centerAndZoom(point, 11);
     map.disableScrollWheelZoom();
+    map.setMapStyle({style:'midnight'});
 
     //地图点JAVA脚本
     var points =[
