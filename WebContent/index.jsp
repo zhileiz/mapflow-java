@@ -1,11 +1,15 @@
 <%@ page language="java"
     contentType="text/html; charset=UTF-8"
-    import="java.util.List,com.shunicom.visualize.*,java.util.ArrayList,java.util.Map"
+    import="java.util.List,com.shunicom.visualize.*,java.util.*"
     pageEncoding="UTF-8"%>
 
 <html>
 
-<% List<String> result = new processCSV().reprocess("/home/zhileiz/heatmap.csv"); %>
+<% 
+processCSV pc = new processCSV();
+List<String> result = pc.reprocess("/home/zhileiz/heatmap.csv"); 
+Iterator<Point> points = pc.iterator();
+%>
 
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -37,6 +41,7 @@
               <div id="clickChange2">人民广场</div>
               <div id="clickChange3">浦东机场</div>
               <div id="clickChange4">中山公园</div>
+              <div>当前区域总人数：<span id="total"></span></div>
          </div>
       </div>
     </div>
@@ -51,18 +56,22 @@
     document.getElementById("clickChange1").onclick = function(){
       var point = new BMap.Point(121.673121,31.14944);
         changeMapPos(point,17,150,800);
+        countCurrent(map);
     }
     document.getElementById("clickChange2").onclick = function(){
       var point = new BMap.Point(121.483329,31.235889);
         changeMapPos(point,17,150,5000);
+        countCurrent(map);
     }
     document.getElementById("clickChange3").onclick = function(){
       var point = new BMap.Point(121.817487,31.15766);
         changeMapPos(point,16,150,3000);
+        countCurrent(map);
     }
     document.getElementById("clickChange4").onclick = function(){
       var point = new BMap.Point(121.424581,31.225596);
         changeMapPos(point,17,150,5000);
+        countCurrent(map);
     }
 
     // 地图选区重绘函数
@@ -89,6 +98,7 @@
       }
       %>
     ];
+    
 
     //查看是否支持热力图
     if(!isSupportCanvas()){
@@ -108,10 +118,26 @@
         });
         heatmapOverlay.setOptions({"gradient":gradient});
     }
+    
+    countCurrent(map);
 
     //判断浏览区是否支持canvas
     function isSupportCanvas(){
         var elem = document.createElement('canvas');
         return !!(elem.getContext && elem.getContext('2d'));
+    }
+    
+    function countCurrent(map){
+    	var total = 0;
+    	var boundary = map.getBounds();
+    	for (var point in points){
+    		var longit = parseFloat(points[point].lng);
+    		var latit = parseFloat(points[point].lat);
+    		var temp = new BMap.Point(longit,latit);
+    		if (boundary.containsPoint(temp)){
+    		total = total + parseInt(points[point].count);
+    		}
+    	}
+    	document.getElementById("total").innerHTML = total;
     }
 </script>
