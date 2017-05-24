@@ -55,7 +55,7 @@ Iterator<Point> points = pc.iterator();
     // 地图选区操作
     document.getElementById("clickChange1").onclick = function(){
       var point = new BMap.Point(121.673121,31.14944);
-        changeMapPos(point,17,150,800);
+        changeMapPos(point,17,150,500);
         countCurrent(map);
     }
     document.getElementById("clickChange2").onclick = function(){
@@ -65,12 +65,12 @@ Iterator<Point> points = pc.iterator();
     }
     document.getElementById("clickChange3").onclick = function(){
       var point = new BMap.Point(121.817487,31.15766);
-        changeMapPos(point,16,150,3000);
+        changeMapPos(point,16,150,1000);
         countCurrent(map);
     }
     document.getElementById("clickChange4").onclick = function(){
       var point = new BMap.Point(121.424581,31.225596);
-        changeMapPos(point,17,150,5000);
+        changeMapPos(point,17,150,3000);
         countCurrent(map);
     }
 
@@ -108,7 +108,7 @@ Iterator<Point> points = pc.iterator();
     //初始化热力图
     heatmapOverlay = new BMapLib.HeatmapOverlay({"radius":12});
     map.addOverlay(heatmapOverlay);
-    heatmapOverlay.setDataSet({data:points,max:3000});
+    heatmapOverlay.setDataSet({data:points,max:2000});
     function setGradient(){
         var gradient = {};
         var colors = document.querySelectorAll("input[type='color']");
@@ -118,7 +118,6 @@ Iterator<Point> points = pc.iterator();
         });
         heatmapOverlay.setOptions({"gradient":gradient});
     }
-    
     countCurrent(map);
 
     //判断浏览区是否支持canvas
