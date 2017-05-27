@@ -40,6 +40,41 @@ Iterator<Point> points = pc.iterator();
       .chooseDrop{min-height:400px;width:100px;text-align:center;border-radius:50px;z-index:1;background-color:yellow;margin:100px;margin-top:4%;position:absolute;display:block;color:black;font-size:16px;}
       .fa-map-marker{margin-top:12%;}
       .dropdownitem{padding:4px;margin:3px;border-bottom:2px solid black;}
+      #switch{
+      text-align:center;
+      }
+#div1{
+        width: 100px;
+        height: 60px;
+        border-radius: 50px;
+        position: relative;
+    }
+    #div2{
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        position: absolute;
+        background: white;
+        box-shadow: 0px 2px 4px rgba(0,0,0,0.4);
+    }
+    .open1{
+        background: rgba(0,184,0,0.8);
+    }
+    .open2{
+        top: 2px;
+        right: 1px;
+    }
+    .close1{
+        background: rgba(255,255,255,0.4);
+        border:3px solid rgba(0,0,0,0.15);
+        border-left: transparent;
+    }
+    .close2{
+        left: 0px;
+        top: 0px;
+        border:2px solid rgba(0,0,0,0.1);
+    }
+      
       .infobox{min-height:30px;width:20%;z-index:2;margin-left:70%;border-radius:50px;font-size:18px;text-align:center;margin-top:4%;background-color:white;display:block;position:absolute;}
     </style>
   </head>
@@ -70,7 +105,17 @@ Iterator<Point> points = pc.iterator();
               <div onclick="showDrop()"><i class="fa fa-angle-double-up fa-3x" aria-hidden="true"></i></div>
             </div>
         </div>
-    <div class="infobox">当前区域总人数：<span id="total"></span><br/>栅格数：<span id="number"></span><br/>最大值：<span id="max"></span></div>
+    <div class="infobox">当前区域总人数：<span id="total"></span><br/>栅格数：<span id="number"></span><br/>最大值：<span id="max"></span>
+        <div class="row justify-content-center" id="switch">
+            <div class="col-3">选区</div>
+            <div class="col-6">
+	        <div id="div1" class="open1">
+	        <div id="div2" class="open2"></div>
+	        </div>
+        </div>
+        <div class="col-3"> 拖拽</div>
+    </div>
+    </div>
     <div id="container" style="position:relative;"></div>
   </body>
 
@@ -188,6 +233,58 @@ Iterator<Point> points = pc.iterator();
         var elem = document.createElement('canvas');
         return !!(elem.getContext && elem.getContext('2d'));
     }
+    
+    // #####################
+    // 2. 拖拽选区函数
+    // #####################
+    
+    //鼠标绘制完成回调方法   获取各个点的经纬度
+    var overlays = [];
+    var overlaycomplete = function(e){
+        overlays.push(e.overlay);
+        var path = e.overlay.getPath();//Array<Point> 返回多边型的点数组
+        var pointSW = new BMap.Point(path[3].lng,path[3].lat);
+        var pointNE = new BMap.Point(path[1].lng,path[1].lat);
+        var bound = new BMap.Bounds(pointSW,pointNE);
+        var center = bound.getCenter();
+        map.panTo(center, false);
+        while (map.getBounds().containsBounds(bound)){
+            map.zoomIn();
+        }
+        var max = countCurrent(map);
+        redrawByZoomLevel(map,max);
+        clearAll();
+    };
+    var styleOptions = {
+        strokeColor:"red",    //边线颜色。
+        strokeWeight: 3,       //边线的宽度，以像素为单位。
+        strokeOpacity: 0.8,       //边线透明度，取值范围0 - 1。
+        fillOpacity: 0,      //填充的透明度，取值范围0 - 1。
+        strokeStyle: 'solid' //边线的样式，solid或dashed。
+    }
+    //实例化鼠标绘制工具
+    var drawingManager = new BMapLib.DrawingManager(map, {
+        isOpen: false, //是否开启绘制模式
+        enableDrawingTool: false, //是否显示工具栏
+        drawingMode:BMAP_DRAWING_RECTANGLE,//绘制模式  多边形
+        drawingToolOptions: {
+            anchor: BMAP_ANCHOR_TOP_RIGHT, //位置
+            offset: new BMap.Size(5, 5), //偏离值
+            drawingModes:[
+                BMAP_DRAWING_RECTANGLE
+            ]
+        },
+        rectangleOptions: styleOptions //多边形的样式
+    });
+    
+     //添加鼠标绘制工具监听事件，用于获取绘制结果
+    drawingManager.addEventListener('overlaycomplete', overlaycomplete);
+    function clearAll() {
+        for(var i = 0; i < overlays.length; i++){
+            map.removeOverlay(overlays[i]);
+        }
+        overlays.length = 0   
+    }
 
     // #####################
     // 3. 地图和热力图重绘函数
@@ -295,9 +392,14 @@ Iterator<Point> points = pc.iterator();
 
     // 拖拽时重绘地图
     map.addEventListener("dragend",function(evt){
+        var div1=document.getElementById("div1");
+        if (div1.className=="open1"){
         var max = countCurrent(map);
         redrawByZoomLevel(map,max);
-    })
+        } else {
+        	alert(evt.point.lng + "," + evt.point.lat);
+        }
+    });
     
     //选区下拉框
     function showDrop(){
@@ -326,6 +428,25 @@ Iterator<Point> points = pc.iterator();
     }  
     //滚动滑轮触发scrollFunc方法  //ie 谷歌  
     window.onmousewheel = scrollFunc;  
+    
+    window.onload=function(){
+        var div2=document.getElementById("div2");
+        var div1=document.getElementById("div1");
+        div2.onclick=function(){
+        	if (div1.className=="close1"){
+        		div1.className="open1";
+        		div2.className="open2";
+        		map.enableDragging();
+                drawingManager.close();
+        	} else {
+        		div1.className="close1";
+        		div2.className="close2";
+                map.disableDragging();
+                drawingManager.open();
+        	}
+        }
+    }
+    
     
     showDrop();
 
