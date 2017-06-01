@@ -209,13 +209,7 @@ Iterator<Point> points = pc.iterator();
     map.setMapStyle({style:'midnight'});
 
     //地图点JAVA脚本
-    var points =[
-      <%
-      for(String s : result){
-        out.println(s);
-      }
-      %>
-    ];
+    var points =[];
 
     //查看是否支持热力图
     if(!isSupportCanvas()){
@@ -225,8 +219,22 @@ Iterator<Point> points = pc.iterator();
     //初始化热力图
     heatmapOverlay = new BMapLib.HeatmapOverlay({"radius":12});
     map.addOverlay(heatmapOverlay);
-    var max = countCurrent(map);
-    redrawByZoomLevel(map,max);
+    function get(){
+	    $.ajax({
+	        url:"http://localhost:8080/visualize/ServicesServlet",
+	        type:"post",
+	        async:true,
+	        dataType:"json",
+	        success:function(data){
+	          points = data;
+	          var max = countCurrent(map);
+	          redrawByZoomLevel(map,max);
+	          alert("redraw");
+	        }
+	       });
+    }
+    get();
+    var t = setInterval("get()",30000);
 
     //判断浏览区是否支持canvas
     function isSupportCanvas(){
@@ -250,6 +258,7 @@ Iterator<Point> points = pc.iterator();
         map.panTo(center, false);
         while (map.getBounds().containsBounds(bound)){
             map.zoomIn();
+            map.panTo(center, false);
         }
         var max = countCurrent(map);
         redrawByZoomLevel(map,max);
