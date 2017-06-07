@@ -20,72 +20,32 @@ Iterator<Point> points = pc.iterator();
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
     <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=6254YFdX7nkww3tFT0YLR3ie6nC60kv8"></script>
     <script type="text/javascript" src="http://api.map.baidu.com/library/Heatmap/2.0/src/Heatmap_min.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/library/GeoUtils/1.2/src/GeoUtils_min.js"></script>
     <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
     <script src="https://use.fontawesome.com/d94b0d3b0f.js"></script>
-    <!--加载鼠标绘制工具-->
     <script type="text/javascript" src="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
     <link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
-    <!--加载检索信息窗口-->
     <script type="text/javascript" src="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.js"></script>
     <link rel="stylesheet" href="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.css" />
-    <title>热力图功能示例</title>
-    <style type="text/css">
-      ul,li{list-style: none;margin:0;padding:0;float:left;}
-      html{height:107%;overflow:hidden;background-color:black;}
-      body{min-height:100%;overflow:hidden;font-family:"微软雅黑";margin-left:0px;margin-top:0px;margin-right:0px;background-color:black;}
-      #container{height:100%;width:100%;}
-      #r-result{width:100%;}
-      #menu{border-radius:20px;margin:5%;}
-      .choosePos{height:120px;width:120px;z-index:2;background-color:white;margin:3% 5%;margin-left:90px;border-radius:50%;color:black;text-align:center;position:absolute;}
-      .chooseDrop{min-height:400px;width:100px;text-align:center;border-radius:50px;z-index:1;background-color:yellow;margin:100px;margin-top:4%;position:absolute;display:block;color:black;font-size:16px;}
-      .fa-map-marker{margin-top:12%;}
-      .dropdownitem{padding:4px;margin:3px;border-bottom:2px solid black;}
-      #switch{
-      text-align:center;
-      }
-#div1{
-        width: 100px;
-        height: 60px;
-        border-radius: 50px;
-        position: relative;
-    }
-    #div2{
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        position: absolute;
-        background: white;
-        box-shadow: 0px 2px 4px rgba(0,0,0,0.4);
-    }
-    .open1{
-        background: rgba(0,184,0,0.8);
-    }
-    .open2{
-        top: 2px;
-        right: 1px;
-    }
-    .close1{
-        background: rgba(255,255,255,0.4);
-        border:3px solid rgba(0,0,0,0.15);
-        border-left: transparent;
-    }
-    .close2{
-        left: 0px;
-        top: 0px;
-        border:2px solid rgba(0,0,0,0.1);
-    }
-      
-      .infobox{min-height:30px;width:20%;z-index:2;margin-left:70%;border-radius:50px;font-size:18px;text-align:center;margin-top:4%;background-color:white;display:block;position:absolute;}
-    </style>
+    <script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="stylesheets.css" />
+    <title>热力图</title>
   </head>
 
   <body>
-        <div class="choosePos" onclick="showDrop()">
+        <div class="choosePos" onclick="showMain()">
             <i class="fa fa-map-marker fa-5x"></i>
         </div>
-        <div class="chooseDrop" id="maindrop">
+        <div class="chooseDrop" id="mainChoices">
             <div style="margin-top:120px;">
-              <div id="clickAllCity" class="dropdownitem">全市</div>
+                <div id="clickAllCity" class="dropdownitem">全市</div>
+                <div class="dropdownitem" onclick="showDrop()">区县</div>
+                <div class="dropdownitem" onclick="showAreas()">重点</div>
+                <div onclick="showMain()"><i class="fa fa-angle-double-up fa-2x" aria-hidden="true"></i></div>
+            </div>
+        </div>
+        <div class="chooseDrop" id="maindrop" style="margin-left:120px;">
+            <div style="margin-top:163px;">
               <div id="clickHuangpu" class="dropdownitem">黄浦</div>
               <div id="clickXuhui" class="dropdownitem">徐汇</div>
               <div id="clickChangning" class="dropdownitem">长宁</div>
@@ -105,15 +65,39 @@ Iterator<Point> points = pc.iterator();
               <div onclick="showDrop()"><i class="fa fa-angle-double-up fa-3x" aria-hidden="true"></i></div>
             </div>
         </div>
-    <div class="infobox">当前区域总人数：<span id="total"></span><br/>栅格数：<span id="number"></span><br/>最大值：<span id="max"></span>
+        <div class="chooseDrop" id="mainAreas" style="margin-left:120px;">
+            <div style="margin-top:206px;">
+              <div id="clickRenMinGuangChang" class="dropdownitem">人民广场</div>
+              <div id="clickDiShiNi" class="dropdownitem">迪士尼</div>
+              <div id="clickZhongShanGongYuan" class="dropdownitem">中山公园</div>
+              <div id="clickPuDongJiChang" class="dropdownitem">浦东机场</div>
+              <div onclick="showAreas()"><i class="fa fa-angle-double-up fa-3x" aria-hidden="true"></i></div>
+            </div>
+        </div>
+    <div class="infobox">
+        当前区域总人数：<span id="total"></span>&nbsp&nbsp栅格数：<span id="number"></span>&nbsp&nbsp最大值：<span id="max"></span><br/>
+        划定区域总人数：<span id="total2"></span>&nbsp&nbsp栅格数：<span id="number2"></span>&nbsp&nbsp最大值：<span id="max2"></span>
+    </div>
+    <div hidden class="switch-box">
         <div class="row justify-content-center" id="switch">
             <div class="col-3">选区</div>
             <div class="col-6">
-	        <div id="div1" class="open1">
-	        <div id="div2" class="open2"></div>
-	        </div>
+            <div id="div1" class="open1">
+            <div id="div2" class="open2"></div>
+            </div>
         </div>
         <div class="col-3"> 拖拽</div>
+    </div>
+  </div>
+  <div hidden class="infobox2">划定区域总人数：<span id="total2"></span><br/>栅格数：<span id="number2"></span><br/>最大值：<span id="max2"></span>
+            <div class="row justify-content-center" id="switch2">
+            <div class="col-3">放大</div>
+            <div class="col-6">
+            <div id="div3" class="open1">
+            <div id="div4" class="open2"></div>
+            </div>
+        </div>
+        <div class="col-3"> 选择</div>
     </div>
     </div>
     <div id="container" style="position:relative;"></div>
@@ -127,74 +111,98 @@ Iterator<Point> points = pc.iterator();
     // 1. 控件和操作类函数
     // ################
 
+    var layers = [];
     // 地图选区操作
+                // a. 热点区域
+    document.getElementById("clickRenMinGuangChang").onclick = function(){
+      removeRegion(layers);
+      var point = new BMap.Point(121.481139,31.235301);
+      changeCenter(point,17);
+    }
+    document.getElementById("clickDiShiNi").onclick = function(){
+        removeRegion(layers);
+        var point = new BMap.Point(121.674752,31.147665);
+        changeCenter(point,16);
+      }
+    document.getElementById("clickZhongShanGongYuan").onclick = function(){
+        removeRegion(layers);
+        var point = new BMap.Point(121.425139,31.224753);
+        changeCenter(point,17);
+      }
+    document.getElementById("clickPuDongJiChang").onclick = function(){
+        removeRegion(layers);
+        var point = new BMap.Point(121.81484,31.156873);
+        changeCenter(point,15);
+      }
+        // b. 行政区县
     document.getElementById("clickAllCity").onclick = function(){
+      removeRegion(layers);
       var point = new BMap.Point(121.7, 31.16);
       changeCenter(point,11);
     }
     document.getElementById("clickHuangpu").onclick = function(){
-        var point = new BMap.Point(121.491193,31.237373);
-        changeCenter(point,14);
+        getBoundary("上海市黄浦区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickXuhui").onclick = function(){
-        var point = new BMap.Point(121.442944,31.194955);
-        changeCenter(point,14);
+        getBoundary("上海市徐汇区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickChangning").onclick = function(){
-        var point = new BMap.Point(121.430876,31.226667);
-        changeCenter(point,14);
+        getBoundary("上海市长宁区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickJingan").onclick = function(){
-        var point = new BMap.Point(121.453645,31.233922);
-        changeCenter(point,14);
+        getBoundary("上海市静安区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickPutuo").onclick = function(){
-        var point = new BMap.Point(121.402315,31.255424);
-        changeCenter(point,14);
+        getBoundary("上海市普陀区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickHongkou").onclick = function(){
-        var point = new BMap.Point(121.511686,31.27019);
-        changeCenter(point,14);
+        getBoundary("上海市虹口区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickYangpu").onclick = function(){
-        var point = new BMap.Point(121.531523,31.265499);
-        changeCenter(point,14);
+        getBoundary("上海市杨浦区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickMinhang").onclick = function(){
-        var point = new BMap.Point(121.388372,31.118512);
-        changeCenter(point,14);
+        getBoundary("上海市闵行区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickBaoshan").onclick = function(){
-        var point = new BMap.Point(121.388372,31.118512);
-        changeCenter(point,14);
+        getBoundary("上海市宝山区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickJiading").onclick = function(){
-        var point = new BMap.Point(121.272237,31.381373);
-        changeCenter(point,14);
+        getBoundary("上海市嘉定区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickPudong").onclick = function(){
-        var point = new BMap.Point(121.550499,31.227373);
-        changeCenter(point,14);
+        getBoundary("上海市浦东新区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickJinshan").onclick = function(){
-        var point = new BMap.Point(121.348902,30.747995);
-        changeCenter(point,14);
+        getBoundary("上海市金山区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickSongjiang").onclick = function(){
-        var point = new BMap.Point(121.235472,31.038175);
-        changeCenter(point,14);
+        getBoundary("上海市松江区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickQingpu").onclick = function(){
-        var point = new BMap.Point(121.130559,31.156444);
-        changeCenter(point,14);
+        getBoundary("上海市青浦区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickFengxian").onclick = function(){
-        var point = new BMap.Point(121.48054,30.923915);
-        changeCenter(point,14);
+        getBoundary("上海市奉贤区");
+        var t = setTimeout("get()",1000);
       }
     document.getElementById("clickChongming").onclick = function(){
-        var point = new BMap.Point(121.403767,31.628513);
-        changeCenter(point,14);
+        getBoundary("上海市崇明区");
+        var t = setTimeout("get()",1000);
       }
 
     // #####################
@@ -220,18 +228,17 @@ Iterator<Point> points = pc.iterator();
     heatmapOverlay = new BMapLib.HeatmapOverlay({"radius":12});
     map.addOverlay(heatmapOverlay);
     function get(){
-	    $.ajax({
-	        url:"http://localhost:8080/visualize/ServicesServlet",
-	        type:"post",
-	        async:true,
-	        dataType:"json",
-	        success:function(data){
-	          points = data;
-	          var max = countCurrent(map);
-	          redrawByZoomLevel(map,max);
-	          alert("redraw");
-	        }
-	       });
+        $.ajax({
+            url:"http://localhost:8080/visualize/ServicesServlet",
+            type:"post",
+            async:true,
+            dataType:"json",
+            success:function(data){
+              points = data;
+              var max = countCurrent(map);
+              redrawByZoomLevel(map,max);
+            }
+           });
     }
     get();
     var t = setInterval("get()",30000);
@@ -241,15 +248,16 @@ Iterator<Point> points = pc.iterator();
         var elem = document.createElement('canvas');
         return !!(elem.getContext && elem.getContext('2d'));
     }
-    
+
     // #####################
     // 2. 拖拽选区函数
     // #####################
-    
+
     //鼠标绘制完成回调方法   获取各个点的经纬度
     var overlays = [];
     var overlaycomplete = function(e){
         overlays.push(e.overlay);
+        if (document.getElementById("div3").className != "open1"){
         var path = e.overlay.getPath();//Array<Point> 返回多边型的点数组
         var pointSW = new BMap.Point(path[3].lng,path[3].lat);
         var pointNE = new BMap.Point(path[1].lng,path[1].lat);
@@ -262,6 +270,13 @@ Iterator<Point> points = pc.iterator();
         }
         var max = countCurrent(map);
         redrawByZoomLevel(map,max);
+      } else {
+        var path = e.overlay.getPath();//Array<Point> 返回多边型的点数组
+        var pointSW = new BMap.Point(path[3].lng,path[3].lat);
+        var pointNE = new BMap.Point(path[1].lng,path[1].lat);
+        var bound = new BMap.Bounds(pointSW,pointNE);
+        countRegion(map,bound);
+      }
         clearAll();
     };
     var styleOptions = {
@@ -285,14 +300,14 @@ Iterator<Point> points = pc.iterator();
         },
         rectangleOptions: styleOptions //多边形的样式
     });
-    
+
      //添加鼠标绘制工具监听事件，用于获取绘制结果
     drawingManager.addEventListener('overlaycomplete', overlaycomplete);
     function clearAll() {
         for(var i = 0; i < overlays.length; i++){
             map.removeOverlay(overlays[i]);
         }
-        overlays.length = 0   
+        overlays.length = 0
     }
 
     // #####################
@@ -325,6 +340,30 @@ Iterator<Point> points = pc.iterator();
         return (max+total/number)/2.5;
     }
 
+    function countRegion(map, bounds){
+      var total = 0;
+      var number = 0;
+      var max = 0;
+      var onhand = 0;
+      var boundary = bounds;
+      for (var point in points){
+          var longit = parseFloat(points[point].lng);
+          var latit = parseFloat(points[point].lat);
+          var temp = new BMap.Point(longit,latit);
+          if (boundary.containsPoint(temp)){
+              var curr = parseInt(points[point].count);
+              total = total + curr;
+              if (curr > max){
+                  max = curr;
+              }
+              number = number + 1;
+          }
+      }
+      document.getElementById("total2").innerHTML = total;
+      document.getElementById("number2").innerHTML = number;
+      document.getElementById("max2").innerHTML = max;
+    }
+
     // 地图选区重绘函数
     function changeMapPos(point,zoom,radius,scale){
         map.removeOverlay(heatmapOverlay);
@@ -334,7 +373,7 @@ Iterator<Point> points = pc.iterator();
         map.enableDragging();
         heatmapOverlay.setDataSet({data:points,max:scale});
     }
-    
+
     function changeCenter(point,level){
         changeMapPos(point,level,280,3000);
         var max = countCurrent(map);
@@ -403,60 +442,175 @@ Iterator<Point> points = pc.iterator();
     map.addEventListener("dragend",function(evt){
         var div1=document.getElementById("div1");
         if (div1.className=="open1"){
-        var max = countCurrent(map);
-        redrawByZoomLevel(map,max);
+            var max = countCurrent(map);
+            redrawByZoomLevel(map,max);
         } else {
-        	alert(evt.point.lng + "," + evt.point.lat);
+            alert(evt.point.lng + "," + evt.point.lat);
         }
     });
-    
+
     //选区下拉框
     function showDrop(){
-    	var x = document.getElementById('maindrop');
-    	if (x.style.display === 'none'){
-    		x.style.display = 'block';
-    	} else {
-    		x.style.display = 'none';
-    	}
+        var x = document.getElementById('maindrop');
+        var y = document.getElementById('mainAreas');
+        if (x.style.display === 'none'){
+            x.style.display = 'block';
+            if (y.style.display === 'block'){
+                showAreas();
+            }
+        } else {
+            x.style.display = 'none';
+        }
     }
     
+    function showAreas(){
+        var x = document.getElementById('mainAreas');
+        var y = document.getElementById('maindrop');
+        if (x.style.display === 'none'){
+            x.style.display = 'block';
+            if (y.style.display === 'block'){
+                showDrop();
+            }
+        } else {
+            x.style.display = 'none';
+        }
+    }
+    
+    function showMain(){
+        var x = document.getElementById('mainChoices');
+        var y = document.getElementById('maindrop');
+        var z = document.getElementById('mainAreas');
+        if (x.style.display === 'none'){
+            x.style.display = 'block';
+        } else {
+            x.style.display = 'none';
+            if (y.style.display === 'block'){
+            	showDrop();
+            }
+            if (z.style.display === 'block'){
+                showAreas();
+            }
+        }
+    }
+
     //鼠标滚轮缩放
-    var scrollFunc = function (e) {  
-        if (e.wheelDelta) {  //判断浏览器IE，谷歌滑轮事件               
-            if (e.wheelDelta > 0) { //当滑轮向上滚动时  
+    var scrollFunc = function (e) {
+        if (e.wheelDelta) {  //判断浏览器IE，谷歌滑轮事件
+            if (e.wheelDelta > 0) { //当滑轮向上滚动时
                 map.zoomIn();
                 var max = countCurrent(map);
                 redrawByZoomLevel(map,max);
-            }  
-            if (e.wheelDelta < 0) { //当滑轮向下滚动时  
+            }
+            if (e.wheelDelta < 0) { //当滑轮向下滚动时
                 map.zoomOut();
                 var max = countCurrent(map);
                 redrawByZoomLevel(map,max);
-            }  
-        }  
-    }  
-    //滚动滑轮触发scrollFunc方法  //ie 谷歌  
-    window.onmousewheel = scrollFunc;  
-    
+            }
+        }
+    }
+    //滚动滑轮触发scrollFunc方法  //ie 谷歌
+    window.onmousewheel = scrollFunc;
+
     window.onload=function(){
         var div2=document.getElementById("div2");
         var div1=document.getElementById("div1");
+        var div3=document.getElementById("div3");
+        var div4=document.getElementById("div4");
         div2.onclick=function(){
-        	if (div1.className=="close1"){
-        		div1.className="open1";
-        		div2.className="open2";
-        		map.enableDragging();
+            if (div1.className=="close1"){
+                div1.className="open1";
+                div2.className="open2";
+                map.enableDragging();
                 drawingManager.close();
-        	} else {
-        		div1.className="close1";
-        		div2.className="close2";
+            } else {
+                div1.className="close1";
+                div2.className="close2";
                 map.disableDragging();
                 drawingManager.open();
-        	}
+            }
+        }
+        div4.onclick=function(){
+            if (div3.className =="close1"){
+                div3.className="open1";
+                div4.className="open2";
+            } else {
+                div3.className="close1";
+                div4.className="close2";
+                map.disableDragging();
+                drawingManager.open();
+            }
         }
     }
-    
-    
+
+    function getBoundary(k){
+        var bdary = new BMap.Boundary();
+        removeRegion(layers);
+        bdary.get(k, function(rs){       //获取行政区域
+            var count = rs.boundaries.length; //行政区域的点有多少个
+            if (count === 0) {
+                alert('未能获取当前输入行政区域');
+                return ;
+            }
+            var pointArray = [];
+            var total = 0;
+            var number = 0;
+            var max = 0;
+            var onhand = 0;
+            for (var i = 0; i < count; i++) {
+                var ply = new BMap.Polygon(rs.boundaries[i], {strokeWeight: 2, strokeColor: "#ff0000"}); //建立多边形覆盖物
+                map.addOverlay(ply);  //添加覆盖物
+                layers.push(ply);
+                pointArray = pointArray.concat(ply.getPath());
+                for (var point in points){
+                    var longit = parseFloat(points[point].lng);
+                    var latit = parseFloat(points[point].lat);
+                    var temp = new BMap.Point(longit,latit);
+                    if (BMapLib.GeoUtils.isPointInPolygon(temp,ply)){
+                        var curr = parseInt(points[point].count);
+                        total = total + curr;
+                        if (curr > max){
+                            max = curr;
+                        }
+                        number = number + 1;
+                    }
+                }
+            }
+            map.setViewport(pointArray);
+            document.getElementById("total2").innerHTML = total;
+            document.getElementById("number2").innerHTML = number;
+            document.getElementById("max2").innerHTML = max;
+        });
+        return layers[0];
+    }
+    function removeRegion(layers){
+        for (var i = 0; i < layers.length; i++){
+            map.removeOverlay(layers.shift());
+        }
+    }
+
     showDrop();
+    showMain();
+    showAreas();
+    
+    document.onkeydown = checkKey;
+    function checkKey(e){
+    	e = e || window.event;
+        var div2=document.getElementById("div2");
+        var div1=document.getElementById("div1");
+    	if (e.keyCode == "16"){
+    		if (div1.className=="close1"){
+                div1.className="open1";
+                div2.className="open2";
+                map.enableDragging();
+                drawingManager.close();
+            } else {
+                div1.className="close1";
+                div2.className="close2";
+                map.disableDragging();
+                drawingManager.open();
+            }
+    	}
+    }
+
 
 </script>
